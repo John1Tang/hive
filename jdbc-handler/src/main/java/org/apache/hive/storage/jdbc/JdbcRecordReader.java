@@ -52,36 +52,38 @@ public class JdbcRecordReader implements RecordReader<LongWritable, MapWritable>
   @Override
   public boolean next(LongWritable key, MapWritable value) throws IOException {
     try {
-      LOGGER.trace("JdbcRecordReader.next called");
+      LOGGER.info("JdbcRecordReader.next called at {}", pos);
       if (dbAccessor == null) {
         dbAccessor = DatabaseAccessorFactory.getAccessor(conf);
         iterator = dbAccessor.getRecordIterator(conf, split.getLimit(), split.getOffset());
+        LOGGER.info("JdbcRecordReader.next run info: {}", NetUtil.getNet().getRunInfo());
       }
 
       if (iterator.hasNext()) {
-        LOGGER.trace("JdbcRecordReader has more records to read.");
+        LOGGER.info("JdbcRecordReader has more records to read after {}.", pos);
         key.set(pos);
         pos++;
         Map<String, Object> record = iterator.next();
         if ((record != null) && (!record.isEmpty())) {
           for (Entry<String, Object> entry : record.entrySet()) {
             value.put(new Text(entry.getKey()),
-                entry.getValue() == null ? NullWritable.get() : new ObjectWritable(entry.getValue()));
+                    entry.getValue() == null ? NullWritable.get() : new ObjectWritable(entry.getValue()));
+            LOGGER.info("JdbcRecordReader key:{}, value: {}", entry.getKey(), entry.getValue());
           }
           return true;
         }
         else {
-          LOGGER.debug("JdbcRecordReader got null record.");
+          LOGGER.info("JdbcRecordReader got null record.");
           return false;
         }
       }
       else {
-        LOGGER.debug("JdbcRecordReader has no more records to read.");
+        LOGGER.info("JdbcRecordReader has no more records to read after {}.", pos);
         return false;
       }
     }
     catch (Exception e) {
-      LOGGER.error("An error occurred while reading the next record from DB.", e);
+      LOGGER.error("An error occurred while reading the next record from DB at " + pos, e);
       return false;
     }
   }

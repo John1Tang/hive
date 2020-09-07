@@ -43,7 +43,7 @@ public class JdbcInputFormat extends HiveInputFormat<LongWritable, MapWritable> 
    */
   @Override
   public RecordReader<LongWritable, MapWritable>
-    getRecordReader(InputSplit split, JobConf job, Reporter reporter) throws IOException {
+  getRecordReader(InputSplit split, JobConf job, Reporter reporter) throws IOException {
 
     if (!(split instanceof JdbcInputSplit)) {
       throw new RuntimeException("Incompatible split type " + split.getClass().getName() + ".");
@@ -60,7 +60,7 @@ public class JdbcInputFormat extends HiveInputFormat<LongWritable, MapWritable> 
   public InputSplit[] getSplits(JobConf job, int numSplits) throws IOException {
     try {
 
-      LOGGER.debug("Creating {} input splits", numSplits);
+      LOGGER.info("Creating {} input splits", numSplits);
 
       if (dbAccessor == null) {
         dbAccessor = DatabaseAccessorFactory.getAccessor(job);
@@ -79,7 +79,7 @@ public class JdbcInputFormat extends HiveInputFormat<LongWritable, MapWritable> 
       int numRecordsPerSplit = numRecords / numSplits;
       int numSplitsWithExtraRecords = numRecords % numSplits;
 
-      LOGGER.debug("Num records = {}", numRecords);
+      LOGGER.info("Num records = {}", numRecords);
       InputSplit[] splits = new InputSplit[numSplits];
       Path[] tablePaths = FileInputFormat.getInputPaths(job);
 
